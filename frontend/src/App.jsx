@@ -1,11 +1,22 @@
 import { useEffect, useState } from "react";
 import "./App.css";
-import ProductDetails from "./ProductDetails";
+import tshirt from "./assets/tshirt.jpg";
+import hoodie from "./assets/hoodie.jpg";
+import cargo from "./assets/cargo.jpg";
 
 function App() {
-   const [cart, setCart] = useState([]);
-   const [products, setProducts] = useState([]);
-   const [selectedProduct, setSelectedProduct] = useState(null);
+  const [cart, setCart] = useState([]);
+  const [products, setProducts] = useState([]);
+
+  const [search, setSearch] = useState("");
+  const [category, setCategory] = useState("All");
+
+  // Image mapping
+  const imageMap = {
+    "tshirt.jpg": tshirt,
+    "hoodie.jpg": hoodie,
+    "cargo.jpg": cargo,
+  };
 
   // Get products from backend
   useEffect(() => {
@@ -79,9 +90,7 @@ function App() {
 
   // Remove product
   const removeFromCart = (id) => {
-    setCart(
-      cart.filter((item) => item._id !== id)
-    );
+    setCart(cart.filter((item) => item._id !== id));
   };
 
   // Calculate total
@@ -91,17 +100,35 @@ function App() {
     0
   );
 
-  // Total number of items
+  // Cart count
   const cartCount = cart.reduce(
     (total, item) => total + item.quantity,
     0
   );
 
+  // Categories
+  const categories = [
+    "All",
+    ...new Set(products.map((product) => product.category)),
+  ];
+
+  // Search + category filter
+  const filteredProducts = products.filter((product) => {
+    const matchesSearch = product.name
+      .toLowerCase()
+      .includes(search.toLowerCase());
+
+    const matchesCategory =
+      category === "All" ||
+      product.category === category;
+
+    return matchesSearch && matchesCategory;
+  });
+
   return (
     <div className="app">
 
       {/* Navbar */}
-
       <nav className="navbar">
 
         <div className="logo">
@@ -111,8 +138,8 @@ function App() {
         <div className="nav-links">
           <a href="#">Home</a>
           <a href="#shop">Shop</a>
-          <a href="#">Men</a>
-          <a href="#">Women</a>
+          <a href="#shop">Men</a>
+          <a href="#shop">Women</a>
         </div>
 
         <div className="nav-icons">
@@ -131,7 +158,6 @@ function App() {
 
 
       {/* Hero */}
-
       <section className="hero">
 
         <div className="hero-content">
@@ -149,9 +175,11 @@ function App() {
             for everyday style.
           </p>
 
-          <button className="shop-button">
-            SHOP NOW
-          </button>
+          <a href="#shop">
+            <button className="shop-button">
+              SHOP NOW
+            </button>
+          </a>
 
         </div>
 
@@ -159,7 +187,6 @@ function App() {
 
 
       {/* Products */}
-
       <section
         className="products-section"
         id="shop"
@@ -171,54 +198,100 @@ function App() {
 
         <h2>NEW ARRIVALS</h2>
 
+
+        {/* Search */}
+        <div className="shop-controls">
+
+          <input
+            type="text"
+            placeholder="Search products..."
+            value={search}
+            onChange={(e) =>
+              setSearch(e.target.value)
+            }
+          />
+
+
+          {/* Category Filter */}
+          <select
+            value={category}
+            onChange={(e) =>
+              setCategory(e.target.value)
+            }
+          >
+
+            {categories.map((cat) => (
+              <option
+                key={cat}
+                value={cat}
+              >
+                {cat}
+              </option>
+            ))}
+
+          </select>
+
+        </div>
+
+
+        {/* Product Grid */}
         <div className="products-grid">
 
-          {products.map((product) => (
+          {filteredProducts.length === 0 ? (
 
-            <div
-              className="product-card"
-              key={product._id}
-            >
+            <p>
+              No products found.
+            </p>
 
-             <div
-              className="product-image"
-              onClick={() => setSelectedProduct(product)}
-              style={{ cursor: "pointer" }}
-             >
-              <img
-              src={`/src/assets/${product.image}`}
-               alt={product.name}
-             />
-             </div>
+          ) : (
 
-              <div className="product-info">
+            filteredProducts.map((product) => (
 
-                <p className="product-category">
-                  {product.category}
-                </p>
+              <div
+                className="product-card"
+                key={product._id}
+              >
 
-                <h3>
-                  {product.name}
-                </h3>
+                <div className="product-image">
 
-                <p className="product-price">
-                  ₹{product.price}
-                </p>
+                  <img
+                    src={imageMap[product.image]}
+                    alt={product.name}
+                  />
 
-                <button
-                  className="cart-button"
-                  onClick={() =>
-                    addToCart(product)
-                  }
-                >
-                  ADD TO CART
-                </button>
+                </div>
+
+
+                <div className="product-info">
+
+                  <p className="product-category">
+                    {product.category}
+                  </p>
+
+                  <h3>
+                    {product.name}
+                  </h3>
+
+                  <p className="product-price">
+                    ₹{product.price}
+                  </p>
+
+                  <button
+                    className="cart-button"
+                    onClick={() =>
+                      addToCart(product)
+                    }
+                  >
+                    ADD TO CART
+                  </button>
+
+                </div>
 
               </div>
 
-            </div>
+            ))
 
-          ))}
+          )}
 
         </div>
 
@@ -226,7 +299,6 @@ function App() {
 
 
       {/* Cart */}
-
       <section
         className="cart-section"
         id="cart"
@@ -237,6 +309,7 @@ function App() {
         </p>
 
         <h2>SHOPPING CART</h2>
+
 
         {cart.length === 0 ? (
 
@@ -256,9 +329,10 @@ function App() {
               >
 
                 <img
-                  src={`/src/assets/${item.image}`}
+                  src={imageMap[item.image]}
                   alt={item.name}
                 />
+
 
                 <div className="cart-item-info">
 
@@ -273,6 +347,7 @@ function App() {
                   <strong>
                     ₹{item.price}
                   </strong>
+
 
                   <div className="quantity-controls">
 
@@ -302,6 +377,7 @@ function App() {
 
                   </div>
 
+
                   <button
                     className="remove-button"
                     onClick={() =>
@@ -321,7 +397,6 @@ function App() {
 
 
             {/* Cart Total */}
-
             <div className="cart-total">
 
               <h3>
