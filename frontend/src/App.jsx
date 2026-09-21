@@ -1,13 +1,24 @@
 import { useEffect, useState } from "react";
 import "./App.css";
+
+import ProductDetails from "./ProductDetails";
+import Cart from "./Cart";
+
 import tshirt from "./assets/tshirt.jpg";
 import hoodie from "./assets/hoodie.jpg";
 import cargo from "./assets/cargo.jpg";
 
 function App() {
+  // Cart
   const [cart, setCart] = useState([]);
+
+  // Products
   const [products, setProducts] = useState([]);
 
+  // Selected product
+  const [selectedProduct, setSelectedProduct] = useState(null);
+
+  // Search and category
   const [search, setSearch] = useState("");
   const [category, setCategory] = useState("All");
 
@@ -90,15 +101,10 @@ function App() {
 
   // Remove product
   const removeFromCart = (id) => {
-    setCart(cart.filter((item) => item._id !== id));
+    setCart(
+      cart.filter((item) => item._id !== id)
+    );
   };
-
-  // Calculate total
-  const totalPrice = cart.reduce(
-    (total, item) =>
-      total + item.price * item.quantity,
-    0
-  );
 
   // Cart count
   const cartCount = cart.reduce(
@@ -109,26 +115,34 @@ function App() {
   // Categories
   const categories = [
     "All",
-    ...new Set(products.map((product) => product.category)),
+    ...new Set(
+      products.map((product) => product.category)
+    ),
   ];
 
   // Search + category filter
-  const filteredProducts = products.filter((product) => {
-    const matchesSearch = product.name
-      .toLowerCase()
-      .includes(search.toLowerCase());
+  const filteredProducts = products.filter(
+    (product) => {
+      const matchesSearch = product.name
+        .toLowerCase()
+        .includes(search.toLowerCase());
 
-    const matchesCategory =
-      category === "All" ||
-      product.category === category;
+      const matchesCategory =
+        category === "All" ||
+        product.category === category;
 
-    return matchesSearch && matchesCategory;
-  });
+      return (
+        matchesSearch &&
+        matchesCategory
+      );
+    }
+  );
 
   return (
     <div className="app">
 
-      {/* Navbar */}
+      {/* ================= NAVBAR ================= */}
+
       <nav className="navbar">
 
         <div className="logo">
@@ -136,28 +150,47 @@ function App() {
         </div>
 
         <div className="nav-links">
-          <a href="#">Home</a>
-          <a href="#shop">Shop</a>
-          <a href="#shop">Men</a>
-          <a href="#shop">Women</a>
+          <a href="#">
+            Home
+          </a>
+
+          <a href="#shop">
+            Shop
+          </a>
+
+          <a href="#shop">
+            Men
+          </a>
+
+          <a href="#shop">
+            Women
+          </a>
         </div>
 
         <div className="nav-icons">
 
-          <span>🔍</span>
+          <span>
+            🔍
+          </span>
 
-          <a href="#cart" className="cart-icon">
+          <a
+            href="#cart"
+            className="cart-icon"
+          >
             🛒 {cartCount}
           </a>
 
-          <span>👤</span>
+          <span>
+            👤
+          </span>
 
         </div>
 
       </nav>
 
 
-      {/* Hero */}
+      {/* ================= HERO ================= */}
+
       <section className="hero">
 
         <div className="hero-content">
@@ -167,12 +200,15 @@ function App() {
           </p>
 
           <h1>
-            WEAR YOUR <span>ATTITUDE</span>
+            WEAR YOUR{" "}
+            <span>
+              ATTITUDE
+            </span>
           </h1>
 
           <p className="description">
-            Discover premium streetwear designed
-            for everyday style.
+            Discover premium streetwear
+            designed for everyday style.
           </p>
 
           <a href="#shop">
@@ -186,7 +222,21 @@ function App() {
       </section>
 
 
-      {/* Products */}
+      {/* ================= PRODUCT DETAILS ================= */}
+
+      {selectedProduct && (
+        <ProductDetails
+          product={selectedProduct}
+          onAddToCart={addToCart}
+          onBack={() =>
+            setSelectedProduct(null)
+          }
+        />
+      )}
+
+
+      {/* ================= PRODUCTS ================= */}
+
       <section
         className="products-section"
         id="shop"
@@ -196,10 +246,13 @@ function App() {
           GULLYWEAR COLLECTION
         </p>
 
-        <h2>NEW ARRIVALS</h2>
+        <h2>
+          NEW ARRIVALS
+        </h2>
 
 
-        {/* Search */}
+        {/* Search + Category */}
+
         <div className="shop-controls">
 
           <input
@@ -211,8 +264,6 @@ function App() {
             }
           />
 
-
-          {/* Category Filter */}
           <select
             value={category}
             onChange={(e) =>
@@ -235,6 +286,7 @@ function App() {
 
 
         {/* Product Grid */}
+
         <div className="products-grid">
 
           {filteredProducts.length === 0 ? (
@@ -245,51 +297,71 @@ function App() {
 
           ) : (
 
-            filteredProducts.map((product) => (
+            filteredProducts.map(
+              (product) => (
 
-              <div
-                className="product-card"
-                key={product._id}
-              >
+                <div
+                  className="product-card"
+                  key={product._id}
+                >
 
-                <div className="product-image">
+                  {/* Product Image */}
 
-                  <img
-                    src={imageMap[product.image]}
-                    alt={product.name}
-                  />
-
-                </div>
-
-
-                <div className="product-info">
-
-                  <p className="product-category">
-                    {product.category}
-                  </p>
-
-                  <h3>
-                    {product.name}
-                  </h3>
-
-                  <p className="product-price">
-                    ₹{product.price}
-                  </p>
-
-                  <button
-                    className="cart-button"
+                  <div
+                    className="product-image"
                     onClick={() =>
-                      addToCart(product)
+                      setSelectedProduct(
+                        product
+                      )
                     }
+                    style={{
+                      cursor: "pointer",
+                    }}
                   >
-                    ADD TO CART
-                  </button>
+
+                    <img
+                      src={
+                        imageMap[
+                          product.image
+                        ]
+                      }
+                      alt={product.name}
+                    />
+
+                  </div>
+
+
+                  {/* Product Information */}
+
+                  <div className="product-info">
+
+                    <p className="product-category">
+                      {product.category}
+                    </p>
+
+                    <h3>
+                      {product.name}
+                    </h3>
+
+                    <p className="product-price">
+                      ₹{product.price}
+                    </p>
+
+                    <button
+                      className="cart-button"
+                      onClick={() =>
+                        addToCart(product)
+                      }
+                    >
+                      ADD TO CART
+                    </button>
+
+                  </div>
 
                 </div>
 
-              </div>
-
-            ))
+              )
+            )
 
           )}
 
@@ -298,122 +370,24 @@ function App() {
       </section>
 
 
-      {/* Cart */}
-      <section
-        className="cart-section"
-        id="cart"
-      >
+      {/* ================= CART ================= */}
 
-        <p className="section-small-title">
-          YOUR SHOPPING BAG
-        </p>
+      <div id="cart">
 
-        <h2>SHOPPING CART</h2>
+        <Cart
+          cart={cart}
+          increaseQuantity={
+            increaseQuantity
+          }
+          decreaseQuantity={
+            decreaseQuantity
+          }
+          removeFromCart={
+            removeFromCart
+          }
+        />
 
-
-        {cart.length === 0 ? (
-
-          <p className="empty-cart">
-            Your cart is empty.
-          </p>
-
-        ) : (
-
-          <div className="cart-items">
-
-            {cart.map((item) => (
-
-              <div
-                className="cart-item"
-                key={item._id}
-              >
-
-                <img
-                  src={imageMap[item.image]}
-                  alt={item.name}
-                />
-
-
-                <div className="cart-item-info">
-
-                  <h3>
-                    {item.name}
-                  </h3>
-
-                  <p>
-                    {item.category}
-                  </p>
-
-                  <strong>
-                    ₹{item.price}
-                  </strong>
-
-
-                  <div className="quantity-controls">
-
-                    <button
-                      onClick={() =>
-                        decreaseQuantity(
-                          item._id
-                        )
-                      }
-                    >
-                      −
-                    </button>
-
-                    <span>
-                      {item.quantity}
-                    </span>
-
-                    <button
-                      onClick={() =>
-                        increaseQuantity(
-                          item._id
-                        )
-                      }
-                    >
-                      +
-                    </button>
-
-                  </div>
-
-
-                  <button
-                    className="remove-button"
-                    onClick={() =>
-                      removeFromCart(
-                        item._id
-                      )
-                    }
-                  >
-                    REMOVE
-                  </button>
-
-                </div>
-
-              </div>
-
-            ))}
-
-
-            {/* Cart Total */}
-            <div className="cart-total">
-
-              <h3>
-                Total: ₹{totalPrice}
-              </h3>
-
-              <button className="checkout-button">
-                PROCEED TO CHECKOUT
-              </button>
-
-            </div>
-
-          </div>
-
-        )}
-
-      </section>
+      </div>
 
     </div>
   );

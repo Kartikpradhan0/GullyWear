@@ -1,8 +1,8 @@
 import "./ProductDetails.css";
 
-function ProductDetails({ product, onAddToCart }) {
+function ProductDetails({ product, onAddToCart, onBack }) {
   if (!product) {
-    return <p>Product not found.</p>;
+    return null;
   }
 
   return (
@@ -10,7 +10,7 @@ function ProductDetails({ product, onAddToCart }) {
 
       <div className="product-details-image">
         <img
-          src={`/src/assets/${product.image}`}
+          src={product.image}
           alt={product.name}
         />
       </div>
@@ -38,6 +38,13 @@ function ProductDetails({ product, onAddToCart }) {
           onClick={() => onAddToCart(product)}
         >
           ADD TO CART
+        </button>
+
+        <button
+          className="back-button"
+          onClick={onBack}
+        >
+          ← BACK TO SHOP
         </button>
 
       </div>
